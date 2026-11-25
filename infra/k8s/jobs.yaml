@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata: {name: lyt-migrate}
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: registry.example.com/lyt/api:replace-me
+          command: ["python", "migrate.py"]
+          envFrom: [{secretRef: {name: lyt-runtime}}]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: {name: lyt-readiness-check}
+spec:
+  schedule: "0 * * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: check
+              image: registry.example.com/lyt/api:replace-me
+              command: ["python", "-c", "from urllib.request import urlopen; urlopen('http://api:8000/api/ready', timeout=5).close()"]
