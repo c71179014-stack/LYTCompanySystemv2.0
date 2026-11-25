@@ -12,7 +12,7 @@ curl --fail http://localhost:8080/api/ready
 ```
 
 - 前端 http://localhost:8080，API 文档 http://localhost:8000/docs。
-- MinIO 控制台 http://localhost:9001，开发账号见 `compose.yaml`。
+- 如需对象存储，运行 `docker compose --profile storage up -d`。MinIO 控制台为 http://localhost:9001，开发账号见 `compose.yaml`。若默认镜像源不可用，可用 `MINIO_IMAGE` 指定可访问的兼容镜像。
 - 数据迁移由一次性 `migrate` 服务执行。日常停止用 `docker compose down`。
 - Compose 内的固定密码仅用于本地开发。
 
