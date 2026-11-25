@@ -45,3 +45,18 @@ python -m venv .venv
 生产环境应使用独立的迁移和应用数据库账号，并通过 Vault 等系统供给密钥。
 模板不创建数据库、Redis、S3、Ingress 或 TLS。
 `.harness/pipeline.yaml` 是需替换连接器和项目参数的构建验证示例，不会自动部署。
+
+### 构建环境使用 HTTPS 代理时
+
+如果容器下载依赖时不信任组织代理签发的证书，请将可信的 PEM CA 证书包通过 BuildKit
+secret 提供给构建。证书包须包含环境所需的根证书，不要包含私钥。
+
+```sh
+LYT_BUILD_CA=/path/to/trusted-ca-bundle.pem \
+  docker compose -f compose.yaml -f compose.build-ca.yaml up --build -d
+curl --fail http://localhost:8080/api/ready
+```
+
+该覆盖配置不会关闭 TLS 校验，也不会把 CA 证书包复制进最终镜像。
+Harness 模板还会运行 `api/acceptance.py`，使用流水线临时 PostgreSQL/Redis 验证迁移、
+就绪检查、检索、审计和指标。脚本会写入测试数据，只能对一次性测试数据库运行。

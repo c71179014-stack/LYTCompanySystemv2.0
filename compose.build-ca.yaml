@@ -1,0 +1,13 @@
+services:
+  api:
+    build:
+      secrets: [build_ca]
+  migrate:
+    build:
+      secrets: [build_ca]
+  web:
+    build:
+      secrets: [build_ca]
+secrets:
+  build_ca:
+    file: ${LYT_BUILD_CA:?Set LYT_BUILD_CA to a trusted PEM CA bundle}

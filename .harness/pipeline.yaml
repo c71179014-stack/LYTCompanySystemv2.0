@@ -22,6 +22,23 @@ pipeline:
               connectorRef: REPLACE_K8S_CONNECTOR
               namespace: REPLACE_NAMESPACE
               os: Linux
+          serviceDependencies:
+            - identifier: postgres
+              name: PostgreSQL
+              type: Service
+              spec:
+                connectorRef: REPLACE_IMAGE_CONNECTOR
+                image: pgvector/pgvector:pg16
+                envVariables:
+                  POSTGRES_USER: lyt
+                  POSTGRES_PASSWORD: test-only
+                  POSTGRES_DB: lyt
+            - identifier: redis
+              name: Redis
+              type: Service
+              spec:
+                connectorRef: REPLACE_IMAGE_CONNECTOR
+                image: redis:7-alpine
           execution:
             steps:
               - step:
@@ -32,7 +49,10 @@ pipeline:
                     connectorRef: REPLACE_IMAGE_CONNECTOR
                     image: python:3.12-slim
                     shell: Sh
-                    command: cd api && pip install -r requirements.txt && python -m unittest -v
+                    envVariables:
+                      DATABASE_URL: postgresql://lyt:test-only@localhost:5432/lyt
+                      REDIS_URL: redis://localhost:6379/0
+                    command: cd api && pip install -r requirements.txt && python -m unittest -v && python acceptance.py
               - step:
                   type: Run
                   name: Web build
